@@ -4,7 +4,7 @@ RUN sudo apt-get update \
     && sudo apt-get install -y git-lfs google-perftools bc libgl1 lshw
 
 RUN git clone https://huggingface.co/segmind/tiny-sd \
-    && cd tiny-sd \
+    && cd tiny-sd
 
 # RUN git clone https://github.com/lshqqytiger/stable-diffusion-webui-directml
 
