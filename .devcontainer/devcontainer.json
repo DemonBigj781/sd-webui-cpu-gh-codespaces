@@ -1,5 +1,7 @@
 {
-  "name": "Horde LLM CPU Worker (Codespaces)",
+  "name": "Horde-LLM-CPU-Worker",
+
+  "workspaceFolder": "/workspace",
 
   "dockerFile": "Dockerfile",
   "context": "..",
@@ -25,6 +27,12 @@
   "forwardPorts": [
     2121
   ],
+
+  "portsAttributes": {
+    "2121": {
+      "label": "FTP"
+    }
+  },
 
   "customizations": {
     "codespaces": {
