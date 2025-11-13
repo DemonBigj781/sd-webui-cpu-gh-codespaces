@@ -1,7 +1,7 @@
 {
   "name": "Horde LLM CPU Worker (Codespaces)",
 
-  "dockerFile": "../Dockerfile",
+  "dockerFile": "Dockerfile",
   "context": "..",
 
   "hostRequirements": {
