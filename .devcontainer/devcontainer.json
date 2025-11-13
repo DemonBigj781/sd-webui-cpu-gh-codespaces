@@ -9,19 +9,23 @@
   },
 
   "waitFor": "postCreateCommand",
-
   "overrideCommand": true,
   "remoteUser": "root",
 
-  "postCreateCommand": "cd /app && chmod +x update-runtime.sh && ./update-runtime.sh --scribe",
+  "postCreateCommand": "chmod +x /usr/local/bin/start-all.sh",
 
-  "postStartCommand": "cd /app && nohup ./horde-scribe-bridge.sh > /var/log/horde-scribe.log 2>&1 &",
+  "postStartCommand": "/usr/local/bin/start-all.sh",
 
   "containerEnv": {
     "HORDE_URL": "https://stablehorde.net",
     "HORDE_WORKER_NAME": "cpu-llm-space-worker",
     "HORDE_MAX_THREADS": "8"
   },
+
+  "forwardPorts": [
+    8888,
+    2121
+  ],
 
   "customizations": {
     "codespaces": {
@@ -30,8 +34,7 @@
     "vscode": {
       "extensions": [
         "ms-toolsai.jupyter",
-        "ms-python.python",
-        "ms-azuretools.vscode-docker"
+        "ms-python.python"
       ]
     }
   }
