@@ -21,8 +21,10 @@ RUN apt-get update && apt-get install -y \
     lshw \
     python3 \
     python3-pip \
+    python-is-python3 \
     openssh-server \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Clone AI Horde worker
 RUN git clone --depth=1 https://github.com/Haidra-Org/AI-Horde-Worker.git /app
@@ -33,7 +35,8 @@ RUN cd /app && \
     ./update-runtime.sh --scribe
 
 # Install Jupyter & FTP server libs for built-in Jupyter + FTP
-RUN pip3 install --no-cache-dir jupyterlab pyftpdlib
+# Install full Jupyter stack & FTP server libs
+RUN pip3 install --no-cache-dir jupyterlab notebook jupyter pyftpdlib
 
 # SSH server basic setup
 RUN mkdir -p /var/run/sshd
