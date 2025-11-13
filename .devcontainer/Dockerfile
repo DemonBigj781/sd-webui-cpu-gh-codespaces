@@ -1,14 +1,13 @@
-# Base environment GitHub Spaces supports well
+# CPU-only AI Horde LLM worker + JupyterLab + SSH + FTP
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PATH="/opt/conda/bin:$PATH"
+    PIP_NO_CACHE_DIR=1
 
 WORKDIR /app
 
-# Install base dependencies
+# Base tools + Python + SSH
 RUN apt-get update && apt-get install -y \
     git \
     curl \
@@ -18,37 +17,34 @@ RUN apt-get update && apt-get install -y \
     ffmpeg \
     libsm6 \
     libxext6 \
-    nano \
+    lshw \
+    python3 \
+    python3-pip \
+    openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
-# Install micromamba (used by Horde worker)
-RUN curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest \
-    -o /usr/local/bin/micromamba && \
-    chmod +x /usr/local/bin/micromamba
-
-# Install AI Horde Worker (LLM/Scribe only)
+# Clone AI Horde worker
 RUN git clone --depth=1 https://github.com/Haidra-Org/AI-Horde-Worker.git /app
 
-# Install scribe (text) runtime ONLY — CPU friendly
+# Install scribe runtime (CPU-only LLM)
 RUN cd /app && \
     chmod +x ./update-runtime.sh && \
     ./update-runtime.sh --scribe
 
-# Ensure a default config exists
-RUN cd /app && \
-    if [ ! -f bridgeData.yaml ] && [ -f bridgeData_template.yaml ]; then \
-        cp bridgeData_template.yaml bridgeData.yaml; \
-    fi
+# JupyterLab + simple FTP server
+RUN pip3 install --no-cache-dir jupyterlab pyftpdlib
 
-# Runtime ENV (overridable in GitHub Space Settings → Variables)
-ENV HORDE_API_KEY="" \
-    HORDE_URL="https://stablehorde.net" \
+# SSH server basic setup
+RUN mkdir -p /var/run/sshd
+
+# Copy startup script (relative to build context root)
+COPY .devcontainer/start-all.sh /usr/local/bin/start-all.sh
+RUN chmod +x /usr/local/bin/start-all.sh
+
+# Environment variables for Horde worker (overridden by Codespaces variables if set)
+ENV HORDE_URL="https://stablehorde.net" \
     HORDE_WORKER_NAME="cpu-llm-space-worker" \
     HORDE_MAX_THREADS="8"
 
-RUN cd /app && \
-    chmod +x ./update-runtime.sh && \
-    ./update-runtime.sh --scribe    
-
-# Start the worker automatically
-ENTRYPOINT ["/app/horde-scribe-bridge.sh"]
+# Devcontainer overrides CMD, so just default to a shell
+CMD ["/bin/bash"]
