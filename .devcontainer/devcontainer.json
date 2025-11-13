@@ -15,7 +15,7 @@
   "overrideCommand": true,
   "remoteUser": "root",
 
-  "postCreateCommand": "lshw -C display || true",
+  "postCreateCommand": "cd /app && ./update-runtime.sh --scribe"
 
   "postStartCommand": "cd /app && nohup ./horde-scribe-bridge.sh > /var/log/horde-scribe.log 2>&1 &",
 
