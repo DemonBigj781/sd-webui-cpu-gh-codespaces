@@ -2,7 +2,7 @@
   "name": "Horde LLM CPU Worker (Codespaces)",
 
   // Use the Dockerfile in the repo root
-  "dockerFile": "../Dockerfile",
+  "dockerFile": "Dockerfile",
   "context": "..",
 
   "hostRequirements": {
