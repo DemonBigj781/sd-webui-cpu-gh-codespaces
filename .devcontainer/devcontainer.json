@@ -1,7 +1,7 @@
 {
   "name": "Horde LLM CPU Worker (Codespaces)",
 
-  // Tell devcontainers to use the Dockerfile in the repo root
+  // Use the Dockerfile in the repo root
   "dockerFile": "../Dockerfile",
   "context": "..",
 
@@ -15,13 +15,10 @@
   "overrideCommand": true,
   "remoteUser": "root",
 
-  // Run once after the container is first created
   "postCreateCommand": "lshw -C display || true",
 
-  // Auto-start the Horde LLM worker in the background every time the container starts
   "postStartCommand": "cd /app && nohup ./horde-scribe-bridge.sh > /var/log/horde-scribe.log 2>&1 &",
 
-  // These can be overridden via Codespaces secrets/variables
   "containerEnv": {
     "HORDE_URL": "https://stablehorde.net",
     "HORDE_WORKER_NAME": "cpu-llm-space-worker",
