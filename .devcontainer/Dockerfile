@@ -1,4 +1,3 @@
-# CPU-only AI Horde LLM worker + SSH + FTP (Jupyter used via built-in Codespaces integration)
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -25,30 +24,30 @@ RUN apt-get update && apt-get install -y \
     openssh-server \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Clone AI Horde worker
+# Clone AI Horde worker (scribe/alchemy worker)
 RUN git clone --depth=1 https://github.com/Haidra-Org/AI-Horde-Worker.git /app
 
-# Install scribe runtime (CPU-only LLM)
+# Install scribe runtime (CPU-only text worker)
 RUN cd /app && \
     chmod +x ./update-runtime.sh && \
     ./update-runtime.sh --scribe
 
-# Install Jupyter & FTP server libs for built-in Jupyter + FTP
-# Install full Jupyter stack & FTP server libs
+# Install full Jupyter stack + FTP server
 RUN pip3 install --no-cache-dir jupyterlab notebook jupyter pyftpdlib
 
 # SSH server basic setup
 RUN mkdir -p /var/run/sshd
 
-# Copy startup script
+# Workspace directory for Codespaces
+RUN mkdir -p /workspace
+
+# Startup script
 COPY .devcontainer/start-all.sh /usr/local/bin/start-all.sh
 RUN chmod +x /usr/local/bin/start-all.sh
 
-# Environment variables for Horde worker (overridden by Codespaces variables if set)
+# Default Horde env (overridable via Codespaces variables)
 ENV HORDE_URL="https://stablehorde.net" \
     HORDE_WORKER_NAME="cpu-llm-space-worker" \
     HORDE_MAX_THREADS="8"
 
-# Devcontainer overrides CMD, so default to a shell
 CMD ["/bin/bash"]
