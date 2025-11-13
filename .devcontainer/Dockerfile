@@ -4,7 +4,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
-    ENV PIP_ROOT_USER_ACTION=ignore
+    PIP_ROOT_USER_ACTION=ignore
 
 
 WORKDIR /app
