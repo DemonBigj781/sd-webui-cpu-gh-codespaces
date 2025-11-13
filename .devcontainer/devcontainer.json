@@ -1,32 +1,29 @@
 {
-  "name": "AI Horde CPU LLM Worker (CPU-only)",
+  "name": "Horde LLM CPU Worker (Codespaces)",
+
   "build": {
     "context": "..",
     "dockerfile": "Dockerfile"
   },
 
   "hostRequirements": {
-    "cpus": 8
+    "cpus": 2
   },
 
-  // Let VS Code consider the container “ready” after postCreateCommand runs
   "waitFor": "postCreateCommand",
+  "updateContentCommand": "",
 
-  // Override Dockerfile ENTRYPOINT so the container starts in a shell for dev,
-  // then we start the worker ourselves in postCreateCommand.
   "overrideCommand": true,
+  "remoteUser": "root",
 
-  // Runs once after the container is created.
-  // - Shows display hardware (for debugging)
-  // - Starts the Horde scribe (LLM) worker
-  "postCreateCommand": "sudo lshw -C display || true && cd /app && ./horde-scribe-bridge.sh",
+  "postCreateCommand": "lshw -C display || true",
 
-  // Environment variables for the worker.
-  // HORDE_API_KEY should be set as a Codespaces/Repository secret, not hardcoded here.
+  "postStartCommand": "cd /app && nohup ./horde-scribe-bridge.sh > /var/log/horde-scribe.log 2>&1 &",
+
   "containerEnv": {
     "HORDE_URL": "https://stablehorde.net",
     "HORDE_WORKER_NAME": "cpu-llm-space-worker",
-    "HORDE_MAX_THREADS": "8"
+    "HORDE_MAX_THREADS": "2"
   },
 
   "customizations": {
