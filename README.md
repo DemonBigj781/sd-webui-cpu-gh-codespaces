@@ -1,148 +1,93 @@
-Horde AI LLM Worker — CPU-Only (GitHub Codespaces Edition)
+# Horde AI LLM Worker — CPU-Only (GitHub Codespaces)
 
-This repository runs a CPU-only AI Horde LLM (Scribe) worker fully inside GitHub Codespaces, with no GPU, no Docker-in-Docker, and no image pipelines.
+This repository runs a CPU-only AI Horde LLM (Scribe) worker inside GitHub Codespaces.
+No GPU is required, and no Docker-in-Docker is used — Codespaces builds the container from the files in `.devcontainer/`.
 
-All configuration is handled through:
+The worker automatically installs the scribe runtime and starts when the Codespace boots.
 
-.devcontainer/Dockerfile — builds the worker environment
+## Features
 
-.devcontainer/devcontainer.json — automates setup & auto-start
+- CPU-only text generation worker
+- Uses the AI Horde Scribe backend
+- Automatically installs runtime on first boot
+- Automatically starts the worker in the background
+- 8 CPU threads by default
+- Compatible with free or paid Codespaces
+- No image pipelines, no GPU requirements
 
-GitHub Codespaces — the only runtime environment required
-
-This setup creates a lightweight, reliable CPU text-worker for the AI Horde network.
-
-Features
-
-✔ CPU-only LLM (Scribe) worker
-
-✔ Runs automatically when Codespace starts
-
-✔ Uses 8 threads for inference
-
-✔ No GPU, no Torch CUDA, no image backend
-
-✔ Fully Docker-free inside the Codespace (GitHub builds the container externally)
-
-✔ Auto-install of scribe runtime
-
-✔ Works even on free-tier Codespaces
-
-File Structure
-
-After moving the Dockerfile, your repository now looks like:
+## Repository Structure
 
 horde-worker-llm-cpu-gh-codespaces/
 ├── LICENSE
 ├── PROMPTS
 └── .devcontainer/
-    ├── Dockerfile           # container build instructions
-    └── devcontainer.json    # Codespaces automation (runtime install + auto-start)
+    ├── Dockerfile
+    └── devcontainer.json
 
+Everything needed for Codespaces is inside `.devcontainer/`.
 
-The root folder is clean — everything the Codespace needs is inside .devcontainer/.
+## Required Configuration
 
-Requirements Before Launch
-
-You must configure your Horde API key.
-
-Go to:
+Before launching a Codespace, add your Horde API key:
 
 GitHub → Repository → Settings → Variables → New repository variable
 
-Add:
+| Name            | Value                      |
+|-----------------|----------------------------|
+| HORDE_API_KEY   | Your AI Horde worker key   |
 
-Name	Value
-HORDE_API_KEY	Your AI Horde worker key
+Optional overrides:
 
-Optional:
+| Name              | Purpose                     |
+|-------------------|-----------------------------|
+| HORDE_WORKER_NAME | Custom worker name          |
+| HORDE_MAX_THREADS | Number of CPU threads (8)   |
 
-Name	Purpose
-HORDE_WORKER_NAME	Override name shown on the Horde dashboard
-HORDE_MAX_THREADS	Override CPU threads (default: 8)
+Codespaces injects these automatically when building the devcontainer.
 
-Codespaces injects these into the devcontainer at runtime.
+## Starting the Worker
 
-Starting the Worker in Codespaces
-1. Create a Codespace
+1. Create a Codespace  
+From GitHub: Code → Create Codespace on Main
 
-Go to your repo → Code → Create Codespace on main
+Codespaces will:
+- Build the container from `.devcontainer/Dockerfile`
+- Install the scribe runtime
+- Start the worker automatically
 
-GitHub will:
+2. Check worker logs
 
-Build the image using .devcontainer/Dockerfile
-
-Create the container environment
-
-Run update-runtime.sh --scribe
-
-Auto-start the worker in the background
-
-2. Confirm the Worker is Running
-
-Inside the Codespace terminal:
-
+```
 tail -f /var/log/horde-scribe.log
+```
 
-
-You should see connection logs like:
-
+You should see:
 [Scribe] Connecting to Horde...
-[Scribe] Online. Waiting for jobs...
+[Scribe] Online
 
-3. Verify Online in Dashboard
+## Manual Worker Start (Optional)
 
-Visit:
-
-https://stablehorde.net/
-
-Your worker should appear under your account with the configured name.
-
-Manual Worker Start (Optional)
-
-If you want full manual control:
-
+```
 cd /app
 ./update-runtime.sh --scribe
 ./horde-scribe-bridge.sh
+```
 
-What This Devcontainer Does
-.devcontainer/Dockerfile
+## Troubleshooting
 
-Installs Ubuntu base deps
+### Missing Python dependencies
+ModuleNotFoundError: No module named 'requests'
 
-Clones AI-Horde-Worker into /app
-
-Leaves image and GPU toolchains out
-
-Only prepares for scribe runtime
-
-.devcontainer/devcontainer.json
-
-Runs update-runtime.sh --scribe on creation
-
-Starts the worker automatically on every boot
-
-Requests 8 CPU cores from Codespaces
-
-Loads your env/secret variables
-
-Logs worker output to /var/log/horde-scribe.log
-
-Troubleshooting
-Issue: ModuleNotFoundError: requests
-
-Cause: runtime not installed
 Fix:
-
+```
 cd /app
 ./update-runtime.sh --scribe
+```
 
-Issue: “failed to connect; is docker installed?”
+### Worker tries to run image pipelines
+Disable image tasks in `bridgeData.yaml`:
 
-Cause: an image pipeline (img2img/SD/upscale) was mistakenly enabled
-Fix: Ensure your bridgeData.yaml contains:
-
+```
 allow_img: false
 allow_img2img: false
 allow_post_processing: false
@@ -150,16 +95,9 @@ allow_upscale: false
 allow_kohya: false
 allow_text: true
 allow_caption: false
+```
 
-Issue: Worker won’t start on Codespace boot
+## Credits
 
-Check logs:
-
-cat /var/log/horde-scribe.log
-
-Credits
-
-AI Horde Worker:
+AI Horde Worker:  
 https://github.com/Haidra-Org/AI-Horde-Worker
-
-This repo configures it specifically for CPU-only LLM execution inside GitHub Codespaces.
